@@ -2,17 +2,25 @@ package hello;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.regex.Pattern;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Voice_recog {
     private long id;
     private String content;
-    private long[] times;
+    private String[] words;
+    private Voice_recog obj;
 
-    public Voice_recog(long id, String content, long... times) {
+
+    public Voice_recog(long id, String content) {
         this.id = id;
-        this.content = content;
-        this.times = times;
+        this.content = content.substring(1,content.length()-2);     //[["A",x,y],["B",x,y]] -> ["A",x,y],["B",x,y]
+        words = content.split(Pattern.quote("], "));            //["A",x,y   ["B",x,y]
     }
+
+    public void run() throws Exception { }
+
+    public Voice_recog getObj() { return obj; }
 
     public long getId() {
         return id;
@@ -26,12 +34,9 @@ public class Voice_recog {
 
     @Override
     public String toString() {
-        String s = "Voice{" +
+        return "Voice{" +
                 "id= " + id + '\'' +
                 "content= " + content + '\'' +
-                ", times= " ;
-        for (long t: times)
-            s+=(t + " ");
-        return s + '}';
+                ", times= " +  '}';
     }
 }
