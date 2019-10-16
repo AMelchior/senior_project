@@ -8,8 +8,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.MultipartConfigElement;
-
 @SpringBootApplication
 public class Application {
 
@@ -20,8 +18,7 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(Application.class);
 
-        MultipartConfigElement multipartConfigElement = new MultipartConfigElement(TMP_FOLDER,
-                MAX_UPLOAD_SIZE, MAX_UPLOAD_SIZE * 2, MAX_UPLOAD_SIZE / 2);
+
         app.run();
     }
 
