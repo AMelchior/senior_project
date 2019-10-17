@@ -1,17 +1,17 @@
 package hello;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -37,31 +37,40 @@ public class VoiceController {
         return "fileUploadView";
     }
 */
+    //localhost8080/voice
     @RequestMapping("/voice")
     public String voice(@RequestParam(value="content", defaultValue="") String content) {
         try {
             String api = Properties.api;
-
-            String arguments = "--upload-file "+ Properties.audio;
+            //String arguments = "--upload-file " + Properties.audio;
+            //String arguments = "--upload-file "+ "./" + Properties.audio;
+            String arguments = "--upload-file "+ System.getProperty("user.dir") + "\\"+ Properties.audio;
+            FileSystemResource fsr = new FileSystemResource(new File
+                                                    (System.getProperty("user.dir") + "\\"+ Properties.audio));
             RestTemplate restTemplate = new RestTemplate();
-           /*
+           ///*
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-            headers.add("Content-Type", "application/octet-stream");
-            HttpEntity<String> entity = new HttpEntity<>(arguments, headers);
-            */
+            //headers.add("Content-Type", "application/octet-stream");
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            //HttpEntity<String> entity = new HttpEntity<>(arguments, headers);
+            HttpEntity<FileSystemResource> entity = new HttpEntity<>(fsr, headers);
+            //*/
+           /*
             HttpHeaders headers1 = new HttpHeaders();
             headers1.setContentType(MediaType.MULTIPART_FORM_DATA);
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", Properties.audio);
             HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body, headers1);
-            //System.out.println(requestEntity);
             System.out.println( api + "\n" +
                     headers1 + "\n" +
                     body+ "\n" );
+             */
+           System.out.println(api + "\n" +
+                              entity);
             //ResponseEntity<String> r = restTemplate.exchange(api, HttpMethod.GET, entity, String.class);
-            //ResponseEntity<String> r = restTemplate.postForEntity(api, entity, String.class);
-            ResponseEntity<String> r = restTemplate.postForEntity(api, requestEntity, String.class);
+            ResponseEntity<String> r = restTemplate.postForEntity(api, entity, String.class);
+            //ResponseEntity<String> r = restTemplate.postForEntity(api, requestEntity, String.class);
 
             output = r.getBody();
             System.out.println(output);

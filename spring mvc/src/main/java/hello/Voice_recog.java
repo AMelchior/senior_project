@@ -15,10 +15,10 @@ public class Voice_recog {
     public Voice_recog(long id, String content) {
         this.id = id;
         this.content = content.substring(1,content.length()-2);     //[["A",x,y],["B",x,y]] -> ["A",x,y],["B",x,y]
-        words = content.split(Pattern.quote("], "));            //["A",x,y   ["B",x,y]
+        words = content.split(Pattern.quote("], "));             //["A",x,y   ["B",x,y]
+        for( String word : words )
+            word = word.replace("[","");          //"A",x,y    "B",x,y
     }
-
-    public void run() throws Exception { }
 
     public Voice_recog getObj() { return obj; }
 
@@ -32,11 +32,12 @@ public class Voice_recog {
         return content;
     }
 
+    public String[] getWords() { return words;}
+
     @Override
     public String toString() {
         return "Voice{" +
                 "id= " + id + '\'' +
-                "content= " + content + '\'' +
-                ", times= " +  '}';
+                "content= " + content +  '}';
     }
 }
