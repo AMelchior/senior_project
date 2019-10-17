@@ -1,83 +1,72 @@
 package hello;
 
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 
 @RestController
 public class VoiceController {
 
-    File file = new File(Properties.audio);
-
-    private static final String template = "%s";
-    private final AtomicLong counter = new AtomicLong();
     private String output;
-/*
+    private Voice_recog vr = new Voice_recog("");
 
-    @Bean(name = "multipartResolver")
-    public CommonsMultipartResolver multipartResolver() {
-        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-        multipartResolver.setMaxUploadSize(100000);
-        return multipartResolver;
-    }
 
-    @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
-    public String submit(@RequestParam("file") MultipartFile file, ModelMap modelMap) {
-        modelMap.addAttribute("file", file);
-        return "fileUploadView";
-    }
-*/
     //localhost8080/voice
     @RequestMapping("/voice")
     public String voice(@RequestParam(value="content", defaultValue="") String content) {
         try {
             String api = Properties.api;
-            //String arguments = "--upload-file " + Properties.audio;
-            //String arguments = "--upload-file "+ "./" + Properties.audio;
-            String arguments = "--upload-file "+ System.getProperty("user.dir") + "\\"+ Properties.audio;
-            FileSystemResource fsr = new FileSystemResource(new File
-                                                    (System.getProperty("user.dir") + "\\"+ Properties.audio));
+            FileSystemResource fsr = vr.getFileSystemResource();
             RestTemplate restTemplate = new RestTemplate();
-           ///*
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-            //headers.add("Content-Type", "application/octet-stream");
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            //HttpEntity<String> entity = new HttpEntity<>(arguments, headers);
             HttpEntity<FileSystemResource> entity = new HttpEntity<>(fsr, headers);
-            //*/
-           /*
-            HttpHeaders headers1 = new HttpHeaders();
-            headers1.setContentType(MediaType.MULTIPART_FORM_DATA);
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", Properties.audio);
-            HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body, headers1);
-            System.out.println( api + "\n" +
-                    headers1 + "\n" +
-                    body+ "\n" );
-             */
+
            System.out.println(api + "\n" +
                               entity);
-            //ResponseEntity<String> r = restTemplate.exchange(api, HttpMethod.GET, entity, String.class);
             ResponseEntity<String> r = restTemplate.postForEntity(api, entity, String.class);
-            //ResponseEntity<String> r = restTemplate.postForEntity(api, requestEntity, String.class);
 
             output = r.getBody();
+            vr.setContent(output);
             System.out.println(output);
             return output;
         } catch (Exception ex) {
             ex.printStackTrace();
             throw (ex);
         }
+    }
+
+    @RequestMapping(value = "/words", method = RequestMethod.GET)
+    public ResponseEntity<String[]> listAllWords() {
+        String[] words = vr.getWords();
+        if (words != null &&words.length == 0) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<String[]>(words, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/times", method = RequestMethod.GET)
+    public ResponseEntity<List<Long>> listAllTimes() {
+        List<Long> startTimes = vr.getStartTimes();
+        if (startTimes.size() == 0) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<List<Long>>(startTimes, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/content", method = RequestMethod.GET)
+    public ResponseEntity<String> listAllContent() {
+        String words = vr.getContent();
+        if (words.length() == 0) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<String>(words, HttpStatus.OK);
     }
 }
